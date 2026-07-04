@@ -10,6 +10,8 @@
 
 <https://www.anthropic.com/research/building-effective-agents>
 
+[Notes](reading_notes/phase1/Building%20Effective%20AI%20Agents.md)
+
 Anthropic。区分 workflow 和 agent，讲什么时候不该上 agent、tool design、planning、delegation。读完能理解 Claude Code 为什么是一个 while loop。
 
 ### Effective Context Engineering for AI Agents
