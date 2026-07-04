@@ -1,148 +1,124 @@
 # Agent Systems Reading List
 
-面向「想设计 Agent 系统」而不是「想调用某个 Agent 框架」的阅读清单。按系统设计问题组织，而不是常见的 Prompt → RAG → Agent 入门路线。
-
-生产级 Agent（Claude Code、Cursor、Codex）出现才一年多，目前的高收益资料主要来自工程团队的博客和设计文档、开源 Agent 的源码与 issue、以及 Evaluation / Observability / Runtime 方向的论文。这份清单把这些散落的资料重新归位。
-
-不必顺序读完。挑当前最关心的系统设计问题跳读即可。
+按系统设计问题组织的阅读清单。每条只列链接、标题、简介。方法论与评测细节见 [ROADMAP](ROADMAP.md)。
 
 ---
 
 ## Phase 1：建立直觉
 
-**Building Effective AI Agents — Anthropic**
+### Building Effective AI Agents
+
 <https://www.anthropic.com/research/building-effective-agents>
 
-讲 workflow 和 agent 的区别、什么时候不该上 agent、tool design、planning、delegation。读它不是为了学 API，而是为了理解 Claude Code 为什么长成一个 while loop。重点看 Workflow vs Agent、Tool Design 两节。
+Anthropic。区分 workflow 和 agent，讲什么时候不该上 agent、tool design、planning、delegation。读完能理解 Claude Code 为什么是一个 while loop。
 
-**Effective Context Engineering for AI Agents — Anthropic**
+### Effective Context Engineering for AI Agents
+
 <https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents>
 
-Skill、Memory、RAG、Context Compression 本质都属于 context engineering，而不是 prompt engineering。文章介绍了 Claude Code 如何通过引用（文件路径、查询、链接）按需加载上下文，而不是一次性塞进模型。重点看 "Just-in-time Context"。
+Anthropic。把 skill、memory、RAG、context compression 统一进 context engineering 的框架；重点看 just-in-time context——Claude Code 如何用引用按需加载，而不是一次性塞满。
 
 ## Phase 2：Coding Agent 架构
 
-**Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems — arXiv**
+### Dive into Claude Code: The Design Space of Today's and Future AI Agent Systems
+
 <https://arxiv.org/abs/2604.14228>
 
-分析 Claude Code 为什么这样设计，而不是 Claude 怎么写 prompt。值得关注的维度：runtime、context compression、permission、session、skill、hook、subagent、worktree。
+论文。拆解 Claude Code 在 runtime、context compression、permission、session、skill、hook、subagent、worktree 上的设计取舍，而不是讲怎么写 prompt。
 
-**Context Engineering for Coding Agents — Martin Fowler**
+### Context Engineering for Coding Agents
+
 <https://martinfowler.com/articles/exploring-gen-ai/context-engineering-coding-agents.html>
 
-软件工程视角，讨论 rules、skills、specs、workflow，而不是 prompt。
+Martin Fowler。软件工程视角，讨论 rules、skills、specs、workflow。
 
 ## Phase 3：Tool 与 Skill
 
-**Writing Effective Tools for AI Agents — Anthropic**
+### Writing Effective Tools for AI Agents
+
 <https://www.anthropic.com/engineering/writing-tools-for-agents>
 
-tool description、tool granularity、tool evaluation，以及如何用 Claude 自己帮助改进工具设计。做 tool 的人应该看。
+Anthropic。tool description、granularity、evaluation，以及如何让模型自己改进工具描述。
 
-**Code Execution with MCP — Anthropic**
+### Code Execution with MCP
+
 <https://www.anthropic.com/engineering/code-execution-with-mcp>
 
-重点不在 MCP 本身，而在于它解释了为什么 tool 不应该全部暴露给模型：lazy loading、state、context，这些都是 runtime design 的问题。
+Anthropic。重点不在 MCP，而在于为什么 tool 不该全部暴露给模型：lazy loading、state、context 属于 runtime design。
 
 ## Phase 4：Evaluation
 
-评估对象已经从「模型」变成了「Agent 系统」。对一个 skill / agent，真正想知道的是：有没有帮助、帮助了多少、会不会引入副作用、值不值得长期维护。
+工具清单，方法论见 [ROADMAP](ROADMAP.md)。
 
-先看一手资料，而不是框架：
+### OpenAI Evals
 
-- Anthropic 的 tool evaluation 文档——关注 evaluation dataset 怎么设计
-- OpenAI Evals——关注什么叫 success、什么叫 win rate、怎么比较两个 agent
+<https://github.com/openai/evals>
 
-然后再看落地方案：LangSmith、Braintrust、DeepEval、MLflow、TruLens、Inspect AI。
+通用的 LLM/agent evaluation 框架，支持自定义任务和自动评分。
 
-### 分层评估
+### Inspect AI
 
-按重要性从高到低：
+<https://github.com/UKGovernmentBEIS/inspect_ai>
 
-1. **Task Success** — 同一组任务分别 without skill / with skill 跑，比 pass rate。这是核心。
-2. **Cost** — input/output tokens、tool calls、latency、花费，算 improvement / dollar。
-3. **Trajectory** — skill 有没有改变 agent 的行为轨迹（tool count、files opened、retry count）。
-4. **Latency** — wall clock / model latency / tool latency。
-5. **Judge** — 没有标准答案的任务（README、PR、总结）才用 LLM judge 打分。
-6. **Human Preference** — 双盲 A/B 给工程师选，win rate 比 judge 可信。
-7. **Failure Analysis** — 不统计平均，而是分类失败原因（hallucination、wrong file、instruction ignored）。
-8. **Skill Coverage** — skill 是否真正被触发（trigger rate、正确触发、误触发）。
-9. **A/B Test** — 线上对照，看 completion、acceptance、undo、user rating。
-10. **Trace Evaluation** — 给整条 trace 的每一步打分，2025 年后越来越流行。
+UK AI Security Institute 出的 agent benchmark，覆盖 tool use 和多轮任务。
 
-### 判定 success 的优先级
+### LangSmith
 
-- 能自动验证就自动验证（单元测试、集成测试、exit code、benchmark、compile）—— 最好
-- 自己写 checker（JSON 字段校验、SQL 结果一致性）—— 次之
-- LLM judge —— 最后手段，只用于没有标准答案的任务
+<https://smith.langchain.com/>
 
-### Skill 专有指标
+LangChain 的可观测与评估平台，trace、数据集管理、LLM judge、实验对比。
 
-trigger rate、正确 / 误触发、skill conflict、skill adoption（agent 是否真用了 skill 里的指令）、prompt expansion、context saved、retry reduction、tool reduction、cost saved。这些比单纯比成功率更能定位 skill 的价值和问题。
+### Braintrust
 
-### 评测流程
+<https://www.braintrust.dev/>
 
-```
-Dataset (Task 1 / Task 2 / ...)
-   ├── Run (No Skill)
-   └── Run (With Skill)
-          │
-          ▼
-   完整 Session / Trace      ← 工具调用、读写文件、重试、耗时、token
-          │
-          ▼
-   Automatic Checker         ← 必要时才 LLM Judge
-          │
-          ▼
-      Metrics → Compare Report
-```
+在线/离线评估、prompt A/B、回归测试。
 
-把 agent trace 当一等公民采集和比较，能回答的不只是「skill 有没有提升」，还有「为什么提升（或为什么没有）」。
+### DeepEval
 
-### 给 Claude Skill 的四层框架
+<https://github.com/confident-ai/deepeval>
 
-- **Outcome** — 任务是否成功（pass rate）
-- **Efficiency** — token / cost / latency / tool calls 是否改善
-- **Behavior** — trace 是否更短、更稳定，是否减少无效搜索或重试
-- **Reliability** — 不同模型版本、随机种子、代码仓库上是否仍有效
+Python 原生，类 pytest，适合放进 CI 自动评测。
 
-Agent 随机性大，每个 task 跑 3–5 次（或 temperature=0），比平均成功率和方差。
+### MLflow
+
+<https://mlflow.org/>
+
+含 GenAI evaluation，管理实验和指标。
+
+### TruLens
+
+<https://www.trulens.org/>
+
+偏 RAG，反馈函数与质量评估。
 
 ## Phase 5：Observability
 
-重点研究 agent trace，而不是 prompt。
-
-```
-User → Planner → Tool → Tool → Tool → Subagent → Memory → Done
-```
-
-对这条链上的每一步，要想清楚：该记录什么、怎么 replay、怎么 diff 两条 trace、怎么 evaluation。这是目前还没有成熟标准、值得投入的方向。
+目前还没有成熟的 agent trace 标准，这一阶段更偏方向，没有固定清单。关注 agent trace 在每一步的记录、replay、diff、evaluation。思路见 [ROADMAP](ROADMAP.md)。
 
 ## Phase 6：源码
 
-不要一次读完。一周读一个模块，比如：
+不要一次读完，一周读一个模块（skill / session / hook / subagent）。
 
-1. Claude Skill
-2. Session
-3. Hook
-4. Subagent
+### OpenHands
 
-候选项目：OpenHands、Aider、OpenCode。真实项目里的架构取舍往往比书更有参考价值。
+<https://github.com/All-Hands-AI/OpenHands>
 
----
+开源 coding agent，runtime、sandbox、planner、checkpoint 的取舍都能在 PR 里看到。
 
-## 研究主题
+### Aider
 
-长期跟踪的方向：
+<https://github.com/Aider-AI/aider>
 
-- **Agent Runtime** — while loop、状态机、恢复机制、任务调度，所有 agent 的核心
-- **Context Engineering** — skill、memory、RAG、context compression 都归这里
-- **Agent Evaluation** — 从 success rate 走向 trace-level evaluation
-- **Agent Observability** — trace、metrics、replay、cost attribution，目前缺标准
-- **Tool / Skill Design** — 高质量的 tool、skill、hook 让 agent 更可靠高效
-- **Human–Agent Interaction** — Claude Code、Cursor、Codex 的交互设计值得拆解比较
+终端里的 AI pair programming，代码库地图和编辑策略值得读。
 
-## 书（收益有限，按需）
+### OpenCode
+
+<https://github.com/sst/opencode>
+
+开源 coding agent，TypeScript 实现，架构较新。
+
+## 书（收益有限）
 
 对想设计 agent 平台的人，下面这些更像「生产工程入门」而非「agent 入门」，收益不如上面的博客和源码：
 
