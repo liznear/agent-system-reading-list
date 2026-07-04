@@ -98,7 +98,7 @@ Anthropic 内部。规模化使用数百个 skill 后的教训：什么时候 sk
 
 <https://modelcontextprotocol.io/>
 
-MCP 官方文档与规范。理解 tool / data source 的接入协议；[架构概览](https://modelcontextprotocol.io/docs/learn/architecture) 和 [specification](https://spec.modelcontextprotocol.io/specification/) 是核心。
+MCP 官方文档与规范。理解 tool / data source 的接入协议；[架构概览](https://modelcontextprotocol.io/docs/learn/architecture) 和 [specification](https://modelcontextprotocol.io/specification/2025-06-18) 是核心。
 
 ## Phase 4：Evaluation
 
@@ -184,7 +184,7 @@ Python 原生，类 pytest，适合放进 CI 自动评测。
 - **Claude Blog** <https://claude.com/blog> — Claude Code 实践和产品侧的深度文章。
 - **OpenAI Engineering** <https://openai.com/index/> — Codex 系列、harness、agent 工程文章（用 "Engineering" 标签筛）。
 - **Cursor Blog** <https://cursor.com/blog> — 大规模自治编码、agent harness、模型训练的复盘。
-- **Martin Fowler** <https://martinfowler.com/articles/exploring-gen-ai/> — 把 agent 放回软件工程语境的系列。
+- **Martin Fowler** <https://martinfowler.com/articles/exploring-gen-ai.html> — 把 agent 放回软件工程语境的系列。
 
 ### Docs & specs
 
