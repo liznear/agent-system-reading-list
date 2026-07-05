@@ -18,6 +18,8 @@ Anthropic。区分 workflow 和 agent，讲什么时候不该上 agent、tool de
 
 <https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents>
 
+[Notes](reading_notes/phase1/Effective%20Context%20Engineering%20for%20AI%20Agents.md)
+
 Anthropic。把 skill、memory、RAG、context compression 统一进 context engineering 的框架；重点看 just-in-time context——Claude Code 如何用引用按需加载，而不是一次性塞满。
 
 ### Agents (whitepaper)
